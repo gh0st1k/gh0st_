@@ -1,4 +1,4 @@
-# gh0st_
+# gh0st
 
 Update gh0st!
 
