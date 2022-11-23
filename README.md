@@ -1,21 +1,33 @@
 # gh0st_
-Hello in my github! This my project, discord bot gh0st
 
-This is gh0st bot. A multi-bot that has
+Update gh0st!
 
+version 0.0.1(beta)
 
-    1.Economy system (coming soon)
-
-    2.Pvp system (coming soon)
+1. Update economy, add commands
+    1.1) reward (daily)
+    1.2) economy_set_emoji (moderate and administrator command)
+    1.3) economy_set_reward (moderate and administrator command)
+    1.4) work (daily)
     
-    3.Fan commands
+2. Update moderate commands
+    2.1) warn and remove warn
+    2.2) stat (beta version)
 
-    4.Moderator commands
+3. Update menu
+    3.1) add all commands for menu
 
-    5.Bot configuration commands (coming soon)
+Further commands that will be added in the next update
 
-    6.Clan system (in the future)
-    
-Music system (coming soon)
+    1. Adding economy commands (economy settings)
+    2. Adding game teams (games, fan teams)
+    3. Adding commands for setting up auto-moderation
+    4. Adding commands to configure moderation commands
+    5. Starting work on the guild system
+    6. Starting work on private teams
+
+Good luck!
+
+by gh0st1k
 
 
