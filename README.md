@@ -1,6 +1,14 @@
 # gh0st
 ## Info for gh0st
-## Update gh0st
+Hello!
+This is multi bot gh0st!
+
+Prefix - **/**
+Programming language - **Python**
+
+**This is a multi bot that is fully customizable, the bot is set up by commands. Soon a site will be created through which you can view its commands, configure, see all the information about the bot, and you can send ideas for bot commands!**
+
+## Updates gh0st
 
 Update gh0st!
 
@@ -13,11 +21,11 @@ version 0.0.1(beta)
 5. 1.4) work (daily)
     
 2. Update moderate commands
-    2.1) warn and remove warn
-    2.2) stat (beta version)
+3. 2.1) warn and remove warn
+4. 2.2) stat (beta version)
 
 3. Update menu
-    3.1) add all commands for menu
+4. 3.1) add all commands for menu
 
 Further commands that will be added in the next update
 
