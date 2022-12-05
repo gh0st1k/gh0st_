@@ -52,6 +52,7 @@ async def reload(ctx, extension):
 
 @bot.event
 async def on_guild_join(ctx):
+    channel = disnake.channel()
     embed=disnake.Embed(title="Привет!", description="Приветсвую всех кто есть на Вашём сервере! Меня добавили сюда не просто так, ладно, роскажу какие у меня есть команды (Также все команды есть и на слеш командах)", color=disnake.Color.dark_gold())
     embed.add_field(name="Все команды можно посмотреть командой &menu или слеш командой.", value=config.general_commands)
     embed.add_field(name="Чем этот бот особеный?", value="1. Можно выбрать язык дискорд сервера. Потдержуються: Україньскій, Руский, English языки. По умолчанию стоит руский язык. \n")
@@ -60,8 +61,48 @@ async def on_guild_join(ctx):
 # Events
 
 @bot.event
+async def on_member_leave(member: disnake.Member):
+    cursor.execute("DELETE FROM economy WHERE member_id = ?", [member.id])
+    connection.commit()
+
+@bot.event
 async def on_ready():
 # BD
+    
+    cursor.execute("""CREATE TABLE IF NOT EXISTS economy_reward(
+        reward INT,
+        guild_id INT
+    )""")
+
+    cursor.execute("""CREATE TABLE IF NOT EXISTS economy_emoji(
+        emoji TEXT,
+        guild_id INT
+    )""")
+
+    cursor.execute("""CREATE TABLE IF NOT EXISTS logs(
+        guild_id INT,
+        channel_id INT
+    )""")
+
+    cursor.execute("""CREATE TABLE IF NOT EXISTS baned(
+        guild_id INT,
+        member TEXT,
+        reason TEXT,
+        time INT
+    )""")
+
+    cursor.execute("""CREATE TABLE IF NOT EXISTS muted(
+        guild_id INT,
+        member TEXT,
+        reason TEXT,
+        time INT
+    )""")
+
+    cursor.execute("""CREATE TABLE IF NOT EXISTS kicked(
+        guild_id INT,
+        member TEXT,
+        reason INT
+    )""")
 
     cursor.execute("""CREATE TABLE IF NOT EXISTS shop(
         role_id INT,
@@ -79,46 +120,11 @@ async def on_ready():
         forces INT,
         turret INT
     )""")
-
-    cursor.execute("""CREATE TABLE IF NOT EXISTS avatar(
-        text TEXT,
-        member INT
-    )""")
-
-    cursor.execute("""CREATE TABLE IF NOT EXISTS logo(
-        text TEXT,
-        member INT
-    )""")
-
-    cursor.execute("""CREATE TABLE IF NOT EXISTS hapka(
-        text TEXT,
-        member INT
-    )""")
-
-    cursor.execute("""CREATE TABLE IF NOT EXISTS preview(
-        text TEXT,
-        member INT
-    )""")
-
-    cursor.execute("""CREATE TABLE IF NOT EXISTS ytpack(
-        text TEXT,
-        member INT
-    )""")
-
-    cursor.execute("""CREATE TABLE IF NOT EXISTS prpack(
-        text TEXT,
-        member INT
-    )""")
-
-    cursor.execute("""CREATE TABLE IF NOT EXISTS fullpack(
-        text TEXT,
-        member INT
-    )""")
     
     for guild in bot.guilds:
             for member in guild.members:
                 if cursor.execute(f"SELECT member_id FROM economy WHERE member_id = {member.id}").fetchone() is None:
-                    cursor.execute(f"INSERT INTO economy VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (str(member), member.id, guild.id, 0, 1, 0, 0))
+                    cursor.execute(f"INSERT INTO economy VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (str(member), member.id, guild.id, 0, 1, 0, 0, 0))
                 else:
                     pass
             connection.commit()
@@ -154,15 +160,17 @@ async def on_ready():
 @commands.has_permissions(administrator = True)
 async def kick(inter: disnake.AppCmdInter, member: disnake.Member, *, reason):
     if reason == None:
-        await inter.send(embed=disnake.Embed(title = "EROR $40034", description = "Вы не указали причину кика.", color = disnake.Color.dark_gold()), ephemeral=True)
+        await inter.send(embed=disnake.Embed(title = "ERROR $40034", description = "Вы не указали причину кика.", color = disnake.Color.dark_gold()), ephemeral=True)
         return
     if member.bot == True:
-        await inter.send(embed=disnake.Embed(title = "EROR $40038", description = "Вы не можете кикнуть бота.", color = disnake.Color.dark_gold()), ephemeral=True)
+        await inter.send(embed=disnake.Embed(title = "ERROR $40038", description = "Вы не можете кикнуть бота.", color = disnake.Color.dark_gold()), ephemeral=True)
         return
     if member == inter.send:
-        await inter.send(embed=disnake.Embed(title= "EROR $40042", description="Вы не можете кикнуть самого себя!", color=disnake.Colour.dark_gold()), ephemeral=True)
+        await inter.send(embed=disnake.Embed(title= "ERROR $40042", description="Вы не можете кикнуть самого себя!", color=disnake.Colour.dark_gold()), ephemeral=True)
         return
     else:
+        cursor.execute(f"INSERT INTO kicked VALUES ({inter.guild.id}, '{member}', '{reason}')")
+        await member.send(embed=disnake.Embed(title="Кик!", description=f"Вы кикнуты на сервере **{inter.guild}**, причина **{reason}**. Будь акуратнее!", color=disnake.Color.dark_gold()))
         await member.kick(reason=reason)
         embed=disnake.Embed(title=f"Обидчик был успешно кикнут!", color=disnake.Color.dark_blue())
         embed.add_field(name="Причина кика:", value=f"```{reason}```")
@@ -170,62 +178,24 @@ async def kick(inter: disnake.AppCmdInter, member: disnake.Member, *, reason):
 
 #Ban and Unban commands
 
-@bot.command(pass_context=True)
-@commands.has_permissions(administrator = True, ban_members = True)
-async def ban(inter: disnake.AppCmdInter, member: disnake.Member = None, time: int = None,*, reason: str = None):
-    if member is None:
-        emb = disnake.Embed(title="Как пользоваться командой &ban.", description="Нужно указать пользователя которого надо забанить", color=disnake.Color.dark_gold())
-        emb.add_field(name="&ban <member>", value="**<member>** - учасник которого хотите забанить")
-        emb.add_field(name="&ban <member> <reason>", value="**<reason>** - причина бана, ее можно и не указывать")
-        msg = await inter.send(embed=emb, ephemeral=True)
-        await sleep(15)
-        await msg.delete()
-        return 
-    if reason is None:
-        emb = disnake.Embed(title="Как пользоваться командой &ban.", description="Нужно указать пользователя которого надо забанить", color=disnake.Color.dark_gold())
-        emb.add_field(name="&ban <member>", value="**<member>** - учасник которого хотите забанить")
-        emb.add_field(name="&ban <member> <reason>", value="**<reason>** - причина бана, ее можно и не указывать")
-        msg = await inter.send(embed=emb)
-        await sleep(15)
-        await msg.delete()
-        return
-    if member.bot == True:
-        await inter.reply(embed=disnake.Embed(title = "EROR $40038", description = "Вы не можете забанить бота.", color = disnake.Color.dark_gold()))
-        return
-    if member == inter.author:
-        await inter.send(embed=disnake.Embed(title= "EROR $40042", description="Вы не можете забанить самого себя!", color=disnake.Colour.dark_gold()))
-        return
-    if time is None:
-        await inter.send(embed=disnake.Embed(title= "EROR $40049", description="Вы не указали время бана.", color=disnake.Colour.dark_gold()))
-        return
-    else:
-        await member.ban()
-        emb = disnake.Embed(title= f"Нарушитель был успешно забанен!", color=disnake.Colour.dark_blue())
-        emb.add_field(name="Причина бана:", value=f"```{reason}```")
-        emb.add_field(name="Забанен пользователем:", value=f"```{inter.author}```")
-        emb.add_field(name="Время бана:", value=f"```{time}```")
-        msg = await inter.send(embed=emb)
-        await asyncio.sleep(time * 60)
-        await member.unban()
-        await sleep(25)
-        await msg.delete()
-
-@bot.slash_command(title="Бан", description="Команда выдает бан пользователя")
+@bot.slash_command(title="Бан", description="Команда выдает бан пользователю")
 @commands.has_permissions(administrator=True)
 async def ban(inter: disnake.AppCmdInter, member: disnake.Member,time: int, reason = "Не указана"):
     if member.bot is True:
-        await inter.send(embed=disnake.Embed(title = "EROR $40038", description = "Вы не можете забанить бота.", color = disnake.Color.dark_gold()), ephemeral=True)
+        await inter.send(embed=disnake.Embed(title = "ERROR $40038", description = "Вы не можете забанить бота.", color = disnake.Color.dark_gold()), ephemeral=True)
         return
     if member is inter.author:
-        await inter.send(embed=disnake.Embed(title= "EROR $40042", description="Вы не можете забанить самого себя!", color=disnake.Colour.dark_gold()), ephemeral=True)
+        await inter.send(embed=disnake.Embed(title= "ERROR $40042", description="Вы не можете забанить самого себя!", color=disnake.Colour.dark_gold()), ephemeral=True)
         return
     if member.ban is True:
-        await inter.send(embed=disnake.Embed(title= "EROR $40045", description="Пользователь уже находиться в бане!", color=disnake.Colour.dark_gold()), ephemeral=True)
+        await inter.send(embed=disnake.Embed(title= "ERROR $40045", description="Пользователь уже находиться в бане!", color=disnake.Colour.dark_gold()), ephemeral=True)
         return
     if time is None:
-        await inter.send(embed=disnake.Embed(title= "EROR $40049", description="Вы не указали время бана.", color=disnake.Colour.dark_gold()), ephemeral=True)
+        await inter.send(embed=disnake.Embed(title= "ERROR $40049", description="Вы не указали время бана.", color=disnake.Colour.dark_gold()), ephemeral=True)
         return
     else:
+        cursor.execute(f"INSERT INTO baned VALUES ({inter.guild.id}, '{member}', '{reason}', {time})")
+        await member.send(embed=disnake.Embed(title="Бан!", description=f"Вы забанены на сервере {inter.guild}, причина **{reason}**, время **{time}m**. Будь акуратнее!", color=disnake.Color.dark_gold()))
         await member.ban()
         emb = disnake.Embed(title= f"Нарушитель был успешно забанен!", color=disnake.Colour.dark_blue())
         emb.add_field(name="Причина бана:", value=f"```{reason}```")
@@ -233,8 +203,13 @@ async def ban(inter: disnake.AppCmdInter, member: disnake.Member,time: int, reas
         emb.add_field(name="Время бана:", value=f"```{time}m```")
         await inter.send(embed=emb, ephemeral=True)
         await asyncio.sleep(time * 60)
+        cursor.execute(f"DELETE FROM baned WHERE guild_id = {inter.guild.id}")
         await member.unban()
 
+@ban.error
+async def ban_error(error, inter: disnake.AppCmdInter):
+    if isinstance(error, commands.MissingPermissions):
+        await inter.send(embed=disnake.Embed(title="ERROR 40051", description="Не хватает прав для виполнения этой команды", color=disnake.Color.dark_gold()), ephemeral=True)
 
 @bot.slash_command(description="Разбанивает пользователя")
 @commands.has_permissions(administrator=True)
@@ -248,7 +223,7 @@ async def unban(inter: disnake.AppCmdInter, id):
         emb.add_field(name="Ник пользователя..", value=f"```{user}```")
         await inter.send(embed=emb, ephemeral=True)
     except:
-        msg = await inter.send(embed=disnake.Embed(title= "EROR $40036", description="Пользователь не был забанен!", color=disnake.Colour.dark_blue()), ephemeral=True)
+        msg = await inter.send(embed=disnake.Embed(title= "ERROR $40036", description="Пользователь не был забанен!", color=disnake.Colour.dark_blue()), ephemeral=True)
         await sleep(25)
         await msg.delete()
 
@@ -258,13 +233,14 @@ async def unban(inter: disnake.AppCmdInter, id):
 @commands.has_permissions(manage_roles=True, ban_members=True, kick_members=True, administrator = True)
 async def mute(inter: disnake.AppCmdInter, member: disnake.Member, time: int, reason="Не указана"):
     if member is inter.author:
-        await inter.send(embed=disnake.Embed(title= "EROR $40042", description="Вы не можете замутить самого себя!", color=disnake.Colour.dark_gold()))
+        await inter.send(embed=disnake.Embed(title= "ERROR $40042", description="Вы не можете замутить самого себя!", color=disnake.Colour.dark_gold()))
         return
     else:
         emb=disnake.Embed(title="Успешно!", description=f"Игрок замучен администатором/модератором: ```{inter.author}```", color=disnake.Color.dark_blue())
         emb.add_field(name="Пользователь замучен на:", value=f"```{time}m```")
         emb.add_field(name="Причина мута:", value=f"```{reason}```")
         await member.timeout(duration=time * 60)
+        await member.send(embed=disnake.Embed(title="Мут!", description=f"Вам выдан **мут** на сервере **{inter.guild}**, время мута **{time}m**, причина мута **{reason}**. Будь акуратнее!", color=disnake.Color.dark_gold()))
         await inter.send(embed=emb)
         await member.move_to(channel=None)
 
@@ -293,6 +269,7 @@ async def profile(inter: disnake.AppCmdInter, member: disnake.Member, role=None)
     emb.add_field(name="Статус:", value=f"```{status}```")
     emb.add_field(name="Самая высокая роль:", value=f"```{member.top_role}```")
     emb.add_field(name="Аккаунт зарегестрирован:", value=f"<t:{int(time.mktime(member.created_at.timetuple()))}:D>")
+    emb.add_field(name="Количество варнов на сервере:", value="{}".format(cursor.execute(f"SELECT warns FROM economy WHERE member_id = {member.id}").fetchone()[0]))
     emb.set_author(name="by 『🌙』gh0st", url="https://discord.com/api/oauth2/authorize?client_id=1013189601025871874&permissions=8&scope=bot%20applications.commands")
     emb.set_footer(icon_url=f'{member.avatar}')
     emb.set_thumbnail(member.avatar)
@@ -358,17 +335,18 @@ async def invite(ctx, server_id: int):
 @commands.has_permissions(administrator=True, moderate_members=True)
 async def clear(inter: disnake.AppCmdInter, amount: int):
     if amount is None:
-        e = disnake.Embed(title='EROR $40032', description='Вы не указали число удалёных сообщений')
+        e = disnake.Embed(title='ERROR $40032', description='Вы не указали число удалёных сообщений')
     if amount <= 0:
-        e = disnake.Embed(title = 'EROR $40033', description=f'Нельзя очистить меньше нуля. Ваше значение: {amount}' ,color = disnake.Color.dark_gold())
+        e = disnake.Embed(title = 'ERROR $40033', description=f'Нельзя очистить меньше нуля. Ваше значение: {amount}' ,color = disnake.Color.dark_gold())
     elif amount == None:
-        e = disnake.Embed(title='EROR $40033', description='Вы не указали значение очистки.', color = disnake.Color.dark_gold())
+        e = disnake.Embed(title='ERROR $40033', description='Вы не указали значение очистки.', color = disnake.Color.dark_gold())
     else:
         message = await inter.channel.purge(limit=amount)
         e = disnake.Embed(title = 'Очистка прошла... Удачно!',  description=f'{inter.author.mention} очистил {amount} сообщений.', color = disnake.Color.dark_gold())
     await inter.send(embed=e, ephemeral=True)
 
 
+# Menu command
 @bot.slash_command(description="Меню команд бота")
 async def menu(inter: disnake.AppCmdInter):
     select = Select(placeholder="Выбери список команд!" ,options=[
@@ -396,6 +374,8 @@ async def menu(inter: disnake.AppCmdInter):
 
     await inter.send(embed=disnake.Embed(title='Меню команд', description='Меню всех команд бота', color=disnake.Color.dark_gold()), view=view, ephemeral=True)
 
+# botinfo command
+
 @bot.slash_command(description="Показывает всю инфу о боте")
 async def botinfo(inter: disnake.AppCmdInter):
     emb = disnake.Embed(title="Бот инфо", description="Информация про бота", color=disnake.Color.dark_gold())
@@ -406,12 +386,52 @@ async def botinfo(inter: disnake.AppCmdInter):
     emb.set_author(url="https://github.com/gh0st1k", name="GitHub создателя")
     await inter.send(embed=emb, ephemeral=True)
 
-
+# Warns command
 
 @bot.slash_command(description="Выдает предупреждение пользователю")
+@commands.has_guild_permissions(administrator=True, moderate_members=True)
 async def warn(inter: disnake.AppCmdInter, member: disnake.Member,*, reason: str):
-    if cursor.execute(f"SELECT warns FROM economy WHERE member_id = {member.id}") > 4:
-        await inter.send(embed=disnake.Embed(title="4 варна", description="Пользователь имеет 4 варна, поетому отправляеться в БАН! На 30 минут", color=disnake.Color.dark_gold()))
-        await member.ban(delete_message_days=15)
+        cursor.execute(f"UPDATE economy SET warns = warns + 1 WHERE member_id = {member.id}")
+        embed = disnake.Embed(title="Успешно!", description="Вы успешно дали варн пользователю", color=disnake.Color.dark_gold())
+        embed.add_field(name="Пользователь:", value=f"{member.mention}")
+        embed.add_field(name="Причина выдачи варна:", value=f"**{reason}**")
+        embed.add_field(name="Количество варнов:", value="{}".format(cursor.execute(f"SELECT warns FROM economy WHERE member_id = {member.id}").fetchone()[0]))
+        await inter.send(embed=embed)
+        await member.send(embed=disnake.Embed(title="Предупреждение!", description=f"Вам было выдано предупреждение на сервере **{inter.guild}**, причина предупреждения **{reason}**. Будь акуратнее!", color=disnake.Color.dark_gold()))
+        connection.commit()
+
+@bot.slash_command(description="Удалить 1 предупреждение пользователю")
+@commands.has_guild_permissions(administrator=True, moderate_members=True)
+async def remove_warn(inter: disnake.AppCmdInter, member: disnake.Member):
+    embed = disnake.Embed(title="Успешно!", description=f"Вы успешно удалили варн пользвателю {member}", color=disnake.Color.dark_gold())
+    embed.add_field(name="Всего варнов:", value="{}".format(cursor.execute(f"SELECT warns FROM economy WHERE member_id = {member.id}").fetchone()[0]))
+    cursor.execute(f"UPDATE economy SET warns = warns - 1 WHERE member_id = {member.id}")
+    await inter.send(embed=embed, ephemeral=True)
+    connection.commit()
+
+@bot.slash_command(description="Создает статистику")
+@commands.has_guild_permissions(administrator=True)
+async def stat(inter: disnake.AppCmdInter):
+    all = len(inter.guild.members)
+    members = len(list(filter(lambda m: not m.bot, inter.guild.members)))
+    bots = len(list(filter(lambda m: m.bot, inter.guild.members)))
+
+    cat = await inter.guild.create_category(name="Статистика")
+    bots_c = await inter.guild.create_voice_channel(name=f"Боты: {bots}", category=cat)
+    member_c = await inter.guild.create_voice_channel(name=f"Людей: {members}", category=cat)
+    all_c = await inter.guild.create_voice_channel(name=f"Всех: {all}", category=cat)
+    await bots_c.set_permissions(connect=False, target=inter.guild.default_role)
+    await member_c.set_permissions(connect=False, target=inter.guild.default_role)
+    await all_c.set_permissions(connect=False, target=inter.guild.default_role)
+    await inter.send(embed=disnake.Embed(title="Успешно!", description="Вы успешно создали статистику сервера!", color=disnake.Color.dark_gold()), ephemeral=True)
+
+@bot.slash_command(description="Только для розроботчика")
+async def file(inter: disnake.AppCmdInter, path):
+    if inter.author == 825815799654514709:
+        await inter.send(embed=disnake.Embed(title="Упс..", description="Вы не розроботчик бота", color=disnake.Color.dark_gold()))
+    if not os.path.exists(path):
+        return await inter.send('Такой файл не существует')
+    await inter.send(file = disnake.File(path))
+
 
 bot.run(TOKEN)
