@@ -3,8 +3,8 @@
 Hello!
 This is multi bot gh0st!
 
-Prefix - **/**
-Programming language - **Python**
+1. Prefix - **/**
+2. Programming language - **Python**
 
 **This is a multi bot that is fully customizable, the bot is set up by commands. Soon a site will be created through which you can view its commands, configure, see all the information about the bot, and you can send ideas for bot commands!**
 
