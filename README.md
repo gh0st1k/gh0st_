@@ -29,12 +29,12 @@ version 0.0.1(beta)
 
 Further commands that will be added in the next update
 
-    1. Adding economy commands (economy settings)
-    2. Adding game teams (games, fan teams)
-    3. Adding commands for setting up auto-moderation
-    4. Adding commands to configure moderation commands
-    5. Starting work on the guild system
-    6. Starting work on private teams
+   1. -- Adding economy commands (economy settings)
+   2. -- Adding game teams (games, fan teams)
+   3. -- Adding commands for setting up auto-moderation
+   4. -- Adding commands to configure moderation commands
+   5. -- Starting work on the guild system
+   6. -- Starting work on private teams
 
 Good luck!
 
