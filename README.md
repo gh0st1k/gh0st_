@@ -12,7 +12,7 @@ This is multi bot gh0st!
 
 Update gh0st!
 
-version 0.0.1(beta)
+**version 0.0.1(beta)**
 
 1. **1. Update economy, add commands**
 2.   1.1) reward (daily)
@@ -24,10 +24,10 @@ version 0.0.1(beta)
 3. 2.1) warn and remove warn
 4. 2.2) stat (beta version)
 
-3. Update menu
+3. **Update menu**
 4. 3.1) add all commands for menu
 
-Further commands that will be added in the next update
+**Further commands that will be added in the next update**
 
    1. -- Adding economy commands (economy settings)
    2. -- Adding game teams (games, fan teams)
