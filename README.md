@@ -20,9 +20,9 @@ Update gh0st!
 4.   1.3) economy_set_reward (moderate and administrator command)
 5.   1.4) work (daily)
     
-**2. Update moderate commands**
-3.  2.1) warn and remove warn
-4.  2.2) stat (beta version)
+1. **2. Update moderate commands**
+2.  2.1) warn and remove warn
+3.  2.2) stat (beta version)
 
 3. **Update menu**
 4. 3.1) add all commands for menu
