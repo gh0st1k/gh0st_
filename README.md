@@ -16,10 +16,10 @@ Update gh0st!
 
 
 1. **1. Update economy, add commands**
-   * reward (daily)
-   * economy_set_emoji (moderate and administrator command)
-   * economy_set_reward (moderate and administrator command)
-   * work (daily)
+  * reward (daily)
+  * economy_set_emoji (moderate and administrator command)
+  * economy_set_reward (moderate and administrator command)
+  * work (daily)
     
     
 1. **2. Update moderate commands**
@@ -32,12 +32,12 @@ Update gh0st!
 
 **Further commands that will be added in the next update**
 
-   1. -- Adding economy commands (economy settings)
-   2. -- Adding game teams (games, fan teams)
-   3. -- Adding commands for setting up auto-moderation
-   4. -- Adding commands to configure moderation commands
-   5. -- Starting work on the guild system
-   6. -- Starting work on private teams
+   * -- Adding economy commands (economy settings)
+   * -- Adding game teams (games, fan teams)
+   * -- Adding commands for setting up auto-moderation
+   * -- Adding commands to configure moderation commands
+   * -- Starting work on the guild system
+   * -- Starting work on private teams
 
 Good luck!
 
