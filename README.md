@@ -15,7 +15,7 @@ Update gh0st!
 **version 0.0.1(beta)**
 
 
-1. **1. Update economy, add commands**
+1. **Update economy, add commands**
   * reward (daily)
   * economy_set_emoji (moderate and administrator command)
   * economy_set_reward (moderate and administrator command)
