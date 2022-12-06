@@ -16,19 +16,19 @@ Update gh0st!
 
 
 1. **1. Update economy, add commands**
-2.   1.1) reward (daily)
-3.   1.2) economy_set_emoji (moderate and administrator command)
-4.   1.3) economy_set_reward (moderate and administrator command)
-5.   1.4) work (daily)
+   * reward (daily)
+   * economy_set_emoji (moderate and administrator command)
+   * economy_set_reward (moderate and administrator command)
+   * work (daily)
     
     
 1. **2. Update moderate commands**
-2.  2.1) warn and remove warn
-3.  2.2) stat (beta version)
+  * warn and remove warn
+  * stat (beta version)
 
 
 3. **Update menu**
-4. 3.1) add all commands for menu
+  * add all commands for menu
 
 **Further commands that will be added in the next update**
 
