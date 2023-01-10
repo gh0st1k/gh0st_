@@ -10,6 +10,11 @@ This is multi bot gh0st!
 
 ---
 
+1.  ![Commands](https://github.com/gh0st1k/gh0st_#commands)
+2.  ![Updates](https://github.com/gh0st1k/gh0st_#updates-gh0st)
+
+---
+
 # **Commands**
 ## **General commands**
 ### **/menu**
